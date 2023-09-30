@@ -1,30 +1,33 @@
 import numpy as np
 from sklearn.metrics import roc_curve, roc_auc_score
 from sklearn.preprocessing import LabelBinarizer
+from sklearn.metrics import RocCurveDisplay, f1_score
+from itertools import cycle
 import matplotlib.pyplot as plt
 
 
-def test(model, X_test, y_test):
+def test(model, X_test, y_test, n_classes):
     test_loss, test_accuracy = model.evaluate(X_test, y_test)
 
     y_pred = model.predict(X_test)
+    threshold = 0.5
+    y_pred_binary = (y_pred > threshold).astype(int)
+
     lb = LabelBinarizer().fit(y_test)
     y_label = lb.transform(y_test)
-    n_class = 10
-    fpr = []
-    tpr = []
-    thresholds = []
-    # Calculate ROC curve
-    for i in range(n_class):
-        fpr[i], tpr[i], thresholds[i] = roc_curve(y_label, y_pred[:,i], pos_label=i)
-        roc_auc = roc_auc_score(y_label, y_pred[:,i], pos_label=i)
+    print(y_test.shape)
+    print(y_pred.shape)
+    print(y_label.shape)
+
+    f1 = f1_score(y_test, y_pred_binary, average=None)  # 'weighted')
+    print(f"F1 Scores: {f1}")
 
     print(f"Test Accuracy: {test_accuracy * 100:.2f}%")
-    print(f"Test AUC Score: {roc_auc * 100:.2f}%")
-    return test_loss, test_accuracy, fpr, tpr
+
+    return test_loss, test_accuracy, y_pred, y_label
 
 
-def get_plot(history, fpr, tpr):
+def get_plot(history, n_classes, y_pred, y_label):
     plt.figure(figsize=(12, 4))
     plt.subplot(1, 2, 1)
     plt.plot(history.history['loss'], label='Training Loss')
@@ -41,11 +44,25 @@ def get_plot(history, fpr, tpr):
     plt.ylabel('Accuracy')
     plt.legend()
     plt.title('Training and Validation Accuracy')
+    plt.show()
 
-    plt.plot(fpr[0], tpr[0], linestyle='--')
-    plt.title('ROC curve')
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive rate')
-    plt.legend(loc='best')
+    fig, ax = plt.subplots(figsize=(6, 6))
+    colors = cycle(['aqua', 'darkorange', 'cornflowerblue', 'fuchsia',
+                    'red', 'brown', 'green', 'cyan', 'gray', 'purple'])
+    target_names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    for i, color in zip(range(n_classes), colors):
+        RocCurveDisplay.from_predictions(
+            y_label[:, i],
+            y_pred[:, i],
+            name=f"ROC curve for {target_names[i]}",
+            color=color,
+            ax=ax,
+            plot_chance_level=(i == 2),
+        )
 
+    plt.axis("square")
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Extension of Receiver Operating Characteristic\nto One-vs-Rest multiclass")
+    plt.legend()
     plt.show()

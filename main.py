@@ -6,6 +6,7 @@ from testing import test, get_plot
 
 learn_rate = 0.001
 epochs = 1
+n_classes = 10
 
 data = get_data()
 
@@ -19,15 +20,15 @@ X_test_dnn = X_test.reshape(-1, 28*28)
 res = ResNet18()
 cnn = CNN()
 dnn = DNN()
-''''
+''''(history, n_classes, y_label, y_pred)
 res_history = training(res, X_train, y_train, learn_rate, epochs)
-res_test_loss, res_test_accuracy, res_fpr, res_tpr = test(res, X_test, y_test)
-get_plot(res_history, res_fpr, res_tpr)
+res_test_loss, res_test_accuracy, res_y_pred, res_y_label = test(res, X_test, y_test, n_classes)
+get_plot(res_history, n_classes, res_y_pred, res_y_label)
 
 cnn_history = training(cnn, X_train, y_train, learn_rate, epochs)
-cnn_test_loss, cnn_test_accuracy, cnn_fpr, cnn_tpr = test(cnn, X_test, y_test)
-get_plot(cnn_history, cnn_fpr, cnn_tpr)
+cnn_test_loss, cnn_test_accuracy, cnn_y_pred, cnn_y_label = test(cnn, X_test, y_test, n_classes)
+get_plot(cnn_history, n_classes, cnn_y_pred, cnn_y_label)
 '''''
 dnn_history = training(dnn, X_train_dnn, y_train, learn_rate, epochs)
-dnn_test_loss, dnn_test_accuracy, dnn_fpr, dnn_tpr = test(dnn, X_test_dnn, y_test)
-get_plot(dnn_history, dnn_fpr, dnn_tpr)
+dnn_test_loss, dnn_test_accuracy, dnn_y_pred, dnn_y_label = test(dnn, X_test_dnn, y_test, n_classes)
+get_plot(dnn_history, n_classes, dnn_y_pred, dnn_y_label)

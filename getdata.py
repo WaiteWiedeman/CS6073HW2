@@ -15,7 +15,7 @@ def get_data():
     X_test, y_test = test
     print(len(X_train))
     print(len(X_test))
-    print(X_test.shape)
+    print(len(y_test))
 
     X_train = pixel_normalization(X_train)
     X_test = pixel_normalization(X_test)
