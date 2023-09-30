@@ -10,6 +10,8 @@ import warnings
 import numpy as np
 warnings.filterwarnings('ignore')
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelBinarizer
+
 
 
 def pixel_normalization(image):
@@ -30,6 +32,7 @@ y_test = to_categorical(y_test)
 X_train = np.expand_dims(X_train, axis=3)
 X_test = np.expand_dims(X_test, axis=3)
 
+
 cnn = Sequential()
 cnn.add(Conv2D(filters=32, kernel_size=(3, 3), padding='same', strides=(1,1), activation='relu', input_shape=(28, 28, 1)))
 cnn.add(Dropout(.2))
@@ -48,13 +51,16 @@ cnn.compile(optimizer=Adam(learning_rate=0.001),
 
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=3, min_lr=0.00001)
 checkpoint = ModelCheckpoint(filepath='weights.{epoch:02d}-{val_loss:.2f}.hdf5', monitor='val_categorical_accuracy', save_best_only=True)
-history = cnn.fit(X_train, y_train, epochs=10, batch_size=200, validation_data=(X_test, y_test), callbacks=[checkpoint, reduce_lr])
+history = cnn.fit(X_train, y_train, epochs=1, batch_size=200, validation_data=(X_test, y_test), callbacks=[checkpoint, reduce_lr])
 
-y_pred = cnn.predict(X_test)
-predictions = []
-for instance in y_pred:
-    predictions.append(np.argmax(instance))
-
+print(y_test)
+print(y_test.shape)
+lb = LabelBinarizer()
+y_label = lb.fit_transform(y_test)
+print(y_label)
+#y_pred_labels = np.argmax(y_label, axis=1)
+print(y_label.shape)
+''''
 plt.figure(figsize=(7, 7))
 plt.plot(history.history['loss'], color='blue', label='loss');
 plt.plot(history.history['val_loss'], color='red', label='val_loss');
@@ -70,3 +76,4 @@ plt.title('Accuracy vs Validation Accuracy');
 plt.tight_layout()
 
 plt.show()
+'''

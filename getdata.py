@@ -1,15 +1,7 @@
-from keras.layers import Input, Conv2D, BatchNormalization, Activation, Flatten
-from keras.layers import Dense, ZeroPadding2D, Add, AveragePooling2D, MaxPool2D
-from keras.models import Model
 from keras.datasets import mnist
 from keras.utils import to_categorical
-import matplotlib.pyplot as plt
 import numpy as np
-from keras.losses import CategoricalCrossentropy
-from keras.optimizers import Adam
-from keras.metrics import CategoricalAccuracy
-from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
-from models import ResNet18, CNN, DNN
+
 
 def pixel_normalization(image):
     return (image / 255)
