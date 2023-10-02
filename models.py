@@ -1,63 +1,69 @@
+# import packages
 from keras.layers import Input, Conv2D, BatchNormalization, Activation, Flatten
 from keras.layers import Dense, ZeroPadding2D, Add, AveragePooling2D, MaxPool2D, Dropout
 from keras.models import Model, Sequential
 
 
-
+# define function to create identity block for residual neural network
+# takes model and filter size as input and returns the model
 def identity_block(x, filter):
     # copy tensor to variable called x_skip
     x_skip = x
-    # Layer 1
+    # layer 1
     x = Conv2D(filter, (3,3), padding='same')(x)
     x = BatchNormalization(axis=3)(x)
     x = Activation('relu')(x)
-    # Layer 2
+    # layer 2
     x = Conv2D(filter, (3,3), padding='same')(x)
     x = BatchNormalization(axis=3)(x)
-    # Add Residue
+    # add residue
     x = Add()([x, x_skip])
     x = Activation('relu')(x)
     return x
 
 
+# define function to create convolutional block for residual neural network
+# takes model and filter size as input and returns the model
 def convolutional_block(x, filter):
     # copy tensor to variable called x_skip
     x_skip = x
-    # Layer 1
+    # layer 1
     x = Conv2D(filter, (3,3), padding='same', strides=(2,2))(x)
     x = BatchNormalization(axis=3)(x)
     x = Activation('relu')(x)
-    # Layer 2
+    # layer 2
     x = Conv2D(filter, (3,3), padding='same')(x)
     x = BatchNormalization(axis=3)(x)
-    # Processing Residue with conv(1,1)
+    # processing residue with conv(1,1)
     x_skip = Conv2D(filter, (1,1), strides=(2,2))(x_skip)
-    # Add Residue
+    # add residue
     x = Add()([x, x_skip])
     x = Activation('relu')(x)
     return x
 
 
+# define ResNet18 function to build residual network after ResNet18 architecture
+# takes shape and number of classes as input and returns the model
 def ResNet18(shape=(28, 28, 1), classes=10):
-    # Step 1 (Setup Input Layer)
+    # setup input layer
     x_input = Input(shape)
     x = ZeroPadding2D((3, 3))(x_input)
-    # Step 2 (Initial Conv layer along with maxPool)
+    # initial convolutional layer along with maxPool
     x = Conv2D(64, kernel_size=7, strides=2, padding='same')(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = MaxPool2D(pool_size=3, strides=2, padding='same')(x)
-    # Define size of sub-blocks and initial filter size
+    # define size of sub-blocks and initial filter size
     block_layers = [2, 2, 2, 2]
     filter_size = 64
-    # Step 3 Add the Resnet Blocks
-    for i in range(2):
+    # add the residual network blocks
+    for i in range(2):  # only using two blocks for quicker training
         if i == 0:
             # For sub-block 1 Residual/Convolutional block not needed
             for j in range(block_layers[i]):
                 x = identity_block(x, filter_size)
         else:
-            # One Residual/Convolutional Block followed by Identity blocks
+            # one residual/Convolutional Block followed by Identity blocks
             # The filter size will go on increasing by a factor of 2
             filter_size = filter_size*2
             x = convolutional_block(x, filter_size)
@@ -72,6 +78,8 @@ def ResNet18(shape=(28, 28, 1), classes=10):
     return model
 
 
+# define CNN funtion to create convolutional neural network model
+# returns CNN model
 def CNN():
     model = Sequential()
     model.add(Conv2D(filters=32, kernel_size=(3, 3), padding='same', strides=(1, 1), activation='relu',
@@ -87,6 +95,9 @@ def CNN():
     model.add(Dense(units=10, activation='softmax'))
     return model
 
+
+# define DNN function to create deep neural network
+# returns DNN model
 def DNN():
     model = Sequential()
     model.add(Dense(units=512, input_shape=(784,), activation='relu'))

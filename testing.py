@@ -6,27 +6,31 @@ from itertools import cycle
 import matplotlib.pyplot as plt
 
 
+# defining test function
+# takes model, testing data, and number of classes as input
+# returns test loss, test accuracy, prediction probabilities, and labels
 def test(model, X_test, y_test, n_classes):
+    # model evaluate function to get test loss and accuracy
     test_loss, test_accuracy = model.evaluate(X_test, y_test)
-
+    # get y predictions for AUC plot
     y_pred = model.predict(X_test)
-    threshold = 0.5
+    # get binary y prediction for f1 score
+    threshold = 0.5  # threshold for binary conversion
     y_pred_binary = (y_pred > threshold).astype(int)
-
+    # binarize labels for AUC plot
     lb = LabelBinarizer().fit(y_test)
     y_label = lb.transform(y_test)
-    print(y_test.shape)
-    print(y_pred.shape)
-    print(y_label.shape)
+    # calculate f1 score
+    f1 = f1_score(y_test, y_pred_binary, average=None)
+    print(f"F1 Scores: {f1}")  # print f1 scores
 
-    f1 = f1_score(y_test, y_pred_binary, average=None)  # 'weighted')
-    print(f"F1 Scores: {f1}")
-
-    print(f"Test Accuracy: {test_accuracy * 100:.2f}%")
+    print(f"Test Accuracy: {test_accuracy * 100:.2f}%")  # print test accuracy
 
     return test_loss, test_accuracy, y_pred, y_label
 
 
+# define function to plot model performance
+# takes model history, number of classes, y predictions, and y labels as input
 def get_plot(history, n_classes, y_pred, y_label):
     plt.figure(figsize=(12, 4))
     plt.subplot(1, 2, 1)
